@@ -18,6 +18,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class XmlFormatMapper extends Mapper<Object,Text,Text,Text>{
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-
+        context.write(new Text("asdf"),new Text("asdf"));
     }
 }
