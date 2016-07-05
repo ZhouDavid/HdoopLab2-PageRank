@@ -30,6 +30,7 @@ public class RankReducer extends Reducer<Text,Text,Text,Text>{
                 linkTitles = new Text(value);
             }
         }
+        pr = 0.15+0.85*pr;
         String PR = "@"+pr.toString();
         linkTitles.append(PR.getBytes(),0,PR.length());
         context.write(key, linkTitles);

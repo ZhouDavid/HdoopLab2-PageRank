@@ -33,45 +33,48 @@ public class PageRanker {
         System.setProperty("hadoop.home.dir","E:\\share\\yarn\\hadoop-2.7.1");
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-//        if (otherArgs.length < 2) {
-//            System.err.println("Usage: pagerank <in> [<in>...] <out>");
-//            System.exit(2);
-//        }
-
-        //job1
-//        Job job1 = Job.getInstance(conf, "preprocess");
-//        job1.setJarByClass(PageRanker.class);
-//        job1.setMapperClass(XmlFormatMapper.class);
-//        //job.setCombinerClass(XmlFormatReducer.class);
-//        job1.setReducerClass(XmlFormatReducer.class);
-//        job1.setInputFormatClass(MyInputFormat.class);
-//        job1.setOutputFormatClass(MyOutputFormat.class);
-//        job1.setOutputKeyClass(Text.class);
-//        job1.setOutputValueClass(Text.class);
-//        for (int i = 0; i < otherArgs.length - 1; ++i) {
-//            FileInputFormat.addInputPath(job1, new Path(otherArgs[i]));
-//        }
-//        FileOutputFormat.setOutputPath(job1,
-//                new Path(otherArgs[otherArgs.length - 1]));
-
-        //job2\
-        String inputPath = "output";
-        String outputPath = "output0";
-        int Iter_time = 1;
-        Job job2 = Job.getInstance(conf,"rank");
-        for(Integer i =0;i<Iter_time;i++){
-            job2.setJarByClass(PageRanker.class);
-            job2.setMapperClass(RankMapper.class);
-            job2.setReducerClass(RankReducer.class);
-            job2.setOutputFormatClass(MyOutputFormat.class);
-            job2.setOutputKeyClass(Text.class);
-            job2.setOutputValueClass(Text.class);
-            FileInputFormat.addInputPath(job2,new Path(inputPath));
-            FileOutputFormat.setOutputPath(job2,new Path(outputPath));
-            inputPath = outputPath+"\\part-r-0000";
-            outputPath = "output"+i.toString();
+        if (otherArgs.length < 2) {
+            System.err.println("Usage: pagerank <in> [<in>...] <out>");
+            System.exit(2);
         }
-        System.exit(job2.waitForCompletion(true)?0 : 1);
+        //job1
+        Job job1 = Job.getInstance(conf, "preprocess");
+        //job1.setNumReduceTasks(1);
+        job1.setJarByClass(PageRanker.class);
+        job1.setMapperClass(XmlFormatMapper.class);
+        //job.setCombinerClass(XmlFormatReducer.class);
+        job1.setReducerClass(XmlFormatReducer.class);
+        job1.setInputFormatClass(MyInputFormat.class);
+        job1.setOutputFormatClass(MyOutputFormat.class);
+        job1.setOutputKeyClass(Text.class);
+        job1.setOutputValueClass(Text.class);
+        for (int i = 0; i < otherArgs.length - 1; ++i) {
+            FileInputFormat.addInputPath(job1, new Path(otherArgs[i]));
+        }
+        FileOutputFormat.setOutputPath(job1,
+                new Path(otherArgs[otherArgs.length - 1]));
+        job1.waitForCompletion(true);
+        //job2
+        String inputPath = "output\\output";
+        String outputPath = "output\\output0";
+        int Iter_time = 30;
+        Job[] jobs = new Job[Iter_time+1];
+
+        for(Integer i =1;i<=Iter_time;i++){
+            jobs[i] = Job.getInstance(conf,"rank");
+            jobs[i].setJarByClass(PageRanker.class);
+            jobs[i].setMapperClass(RankMapper.class);
+            jobs[i].setReducerClass(RankReducer.class);
+            jobs[i].setOutputFormatClass(MyOutputFormat.class);
+            jobs[i].setOutputKeyClass(Text.class);
+            jobs[i].setOutputValueClass(Text.class);
+            FileInputFormat.addInputPath(jobs[i],new Path(inputPath));
+            FileOutputFormat.setOutputPath(jobs[i],new Path(outputPath));
+            inputPath = outputPath+"\\part-r-00000";
+            outputPath = "output\\output"+i.toString();
+            while(!jobs[i].waitForCompletion(true)){}
+        }
+        System.exit(jobs[Iter_time].waitForCompletion(true)?0 : 1);
 
     }
 }

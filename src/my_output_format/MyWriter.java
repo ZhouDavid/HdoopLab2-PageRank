@@ -34,12 +34,8 @@ public class MyWriter extends RecordWriter<Text,Text> {
             out.write(this.KeyValueSep.getBytes());
         }
         if(link_list!=null){
-            out.write(link_list.getBytes());
-            out.write("@1000".getBytes(),0,"@1000".length());
-            if(NEW_LINE==null){
-                System.err.println("bug's here");
-            }
-            else out.write(NEW_LINE.getBytes());
+            out.write(link_list.getBytes(),0,link_list.getLength());
+            out.write(NEW_LINE.getBytes());
         }
     }
 

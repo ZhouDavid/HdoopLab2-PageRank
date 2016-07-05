@@ -25,10 +25,12 @@ public class XmlFormatReducer extends Reducer<Text,Text,Text,Text>{
 
     public void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
+        //System.err.println("reducing");
         for(Text value:values){
             Text link_list = new Text(value);
-//            String init_pr = new String("@1000");
-//            link_list.append(init_pr.getBytes(),0,init_pr.length());
+            Text init_pr = new Text("@10");
+            link_list.append(init_pr.getBytes(),0,init_pr.getLength());
+            System.err.println(link_list);
             context.write(key,link_list);
         }
     }

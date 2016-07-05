@@ -23,11 +23,17 @@ public class RankMapper extends Mapper<Object,Text,Text,Text>{
     public void map(Object key,Text line,Context context)throws IOException, InterruptedException{
         StringTokenizer tokenizer1 =new StringTokenizer(line.toString(),"+>@");
         StringTokenizer tokenizer2 = new StringTokenizer(line.toString(),">@");
+
+        int links = tokenizer1.countTokens()-2;
         title = new Text(tokenizer2.nextToken());
-        linkTitles = new Text(tokenizer2.nextToken());
+        if(links>0){
+            linkTitles = new Text(tokenizer2.nextToken());
+        }
+        else{
+            linkTitles = new Text("");
+        }
         //System.err.println("MAP:"+title.toString());
         //初始化link_titles
-        final int links = tokenizer1.countTokens()-2;
         Text[] link_titles = new Text[links];
         for(int i = 0;i<links;i++){
             link_titles[i]=new Text();
@@ -38,9 +44,13 @@ public class RankMapper extends Mapper<Object,Text,Text,Text>{
             String tmp = tokenizer1.nextToken();
             if(i>-1){
                 if(i==links){
-                    double d = Double.parseDouble(tmp);
-                    d=d/links;
-                    pr.set(d);
+                    try{
+                        double d = Double.parseDouble(tmp);
+                        d=d/links;
+                        pr.set(d);
+                    }catch(NumberFormatException e){
+                        System.err.println("!"+tmp);
+                    }
                 }
                 else{
                     link_titles[i].set(tmp);
