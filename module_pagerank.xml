@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_pagerank" default="compile.module.pagerank">
+  <dirname property="module.pagerank.basedir" file="${ant.file.module_pagerank}"/>
+  
+  <property name="module.jdk.home.pagerank" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.pagerank" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.pagerank" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.pagerank" value="-encoding UTF-8 -source 1.7 -target 1.7 ${compiler.args}"/>
+  
+  <property name="pagerank.output.dir" value="${module.pagerank.basedir}/out/production/PageRank"/>
+  <property name="pagerank.testoutput.dir" value="${module.pagerank.basedir}/out/test/PageRank"/>
+  
+  <path id="pagerank.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="pagerank.module.production.classpath">
+    <path refid="${module.jdk.classpath.pagerank}"/>
+    <path refid="library.yarn.classpath"/>
+    <fileset dir="${basedir}/../share/yarn/hadoop-2.7.1/share/hadoop/common/lib">
+      <patternset refid="library.patterns"/>
+    </fileset>
+  </path>
+  
+  <path id="pagerank.runtime.production.module.classpath">
+    <pathelement location="${pagerank.output.dir}"/>
+    <path refid="library.yarn.classpath"/>
+    <fileset dir="${basedir}/../share/yarn/hadoop-2.7.1/share/hadoop/common/lib">
+      <patternset refid="library.patterns"/>
+    </fileset>
+  </path>
+  
+  <path id="pagerank.module.classpath">
+    <path refid="${module.jdk.classpath.pagerank}"/>
+    <pathelement location="${pagerank.output.dir}"/>
+    <path refid="library.yarn.classpath"/>
+    <fileset dir="${basedir}/../share/yarn/hadoop-2.7.1/share/hadoop/common/lib">
+      <patternset refid="library.patterns"/>
+    </fileset>
+  </path>
+  
+  <path id="pagerank.runtime.module.classpath">
+    <pathelement location="${pagerank.testoutput.dir}"/>
+    <pathelement location="${pagerank.output.dir}"/>
+    <path refid="library.yarn.classpath"/>
+    <fileset dir="${basedir}/../share/yarn/hadoop-2.7.1/share/hadoop/common/lib">
+      <patternset refid="library.patterns"/>
+    </fileset>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.pagerank">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.pagerank">
+    <patternset refid="excluded.from.module.pagerank"/>
+  </patternset>
+  
+  <path id="pagerank.module.sourcepath">
+    <dirset dir="${module.pagerank.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.pagerank" depends="compile.module.pagerank.production,compile.module.pagerank.tests" description="Compile module PageRank"/>
+  
+  <target name="compile.module.pagerank.production" depends="register.custom.compilers" description="Compile module PageRank; production classes">
+    <mkdir dir="${pagerank.output.dir}"/>
+    <javac2 destdir="${pagerank.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pagerank}/javac">
+      <compilerarg line="${compiler.args.pagerank}"/>
+      <bootclasspath refid="pagerank.module.bootclasspath"/>
+      <classpath refid="pagerank.module.production.classpath"/>
+      <src refid="pagerank.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.pagerank"/>
+    </javac2>
+    
+    <copy todir="${pagerank.output.dir}">
+      <fileset dir="${module.pagerank.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.pagerank.tests" depends="register.custom.compilers,compile.module.pagerank.production" description="compile module PageRank; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.pagerank" description="cleanup module">
+    <delete dir="${pagerank.output.dir}"/>
+    <delete dir="${pagerank.testoutput.dir}"/>
+  </target>
+</project>

@@ -51,17 +51,18 @@ public class MyReader extends RecordReader<Text,Text>{
         line.clear();
         content.clear();
         title.clear();
+        link_list.clear();
         int linesize = in.readLine(line);
         if(linesize <=0) return false;
         content = new Text(line);
-        while(!line.equals("</page>")){
+        while(line.toString().indexOf("</page>")==-1){
             content.append(line.getBytes(),0,line.getLength());
             if(line.toString().startsWith("<title>")){
                 abstractTitle();
             }
-            linesize = in.readLine(line);
-            if(linesize<=0)return false;
+            in.readLine(line);
         }
+        content.append(line.getBytes(),0,line.getLength());
         abstractLinks();
         return true;
     }
@@ -78,7 +79,7 @@ public class MyReader extends RecordReader<Text,Text>{
 
     @Override
     public void close() throws IOException{
-
+        in.close();
     }
 
     @Override
@@ -87,20 +88,23 @@ public class MyReader extends RecordReader<Text,Text>{
     }
 
     public void abstractTitle(){
-        int end = line.find("</text>");
-        int len = end-7;
-        title = new Text(line.toString().substring(7,len));
+        int end = line.toString().indexOf("</title>");
+        title = new Text(line.toString().substring(7,end));
+        //System.err.println(title.toString());
     }
 
     public void abstractLinks(){
         int start=0;
         int end = -2;
         while(end!=-1){
-            start = content.find("[[",end+2);
-            end = content.find("]]",start);
-            if(start==-1) break;
-            link_list.append(content.toString().substring(start+2,end).getBytes(),0,(end-start-2));
-            link_list.append(("+").getBytes(),0,1);
+            start = content.toString().indexOf("[[",end+2);
+            if(start!=-1){
+                end = content.toString().indexOf("]]",start);
+                if(end==-1) break;
+                link_list.append(content.toString().substring(start+2,end).getBytes(),0,(end-start-2));
+                link_list.append(("+").getBytes(),0,1);
+            }
+            else break;
         }
     }
 }
