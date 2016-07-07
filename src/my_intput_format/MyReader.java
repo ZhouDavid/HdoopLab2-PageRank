@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 
+import edu.jhu.nlp.wikipedia.WikiXMLDOMParser;
+import edu.jhu.nlp.wikipedia.WikiXMLParser;
 import org.apache.commons.io.IOExceptionWithCause;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -34,6 +36,8 @@ public class MyReader extends RecordReader<Text,Text>{
     @Override
     public void initialize(InputSplit input, TaskAttemptContext context)
             throws IOException,InterruptedException{
+        //WikiXMLParser xwp = new WikiXMLDOMParser("E:\\HdoopLab2-PageRank\\input\\enwiki-latest-pages-articles.xml.bz2");
+
         FileSplit split = (FileSplit)input;
         Configuration job = context.getConfiguration();
         Path fpath = split.getPath();
@@ -55,15 +59,17 @@ public class MyReader extends RecordReader<Text,Text>{
         int linesize = in.readLine(line);
         if(linesize <=0) return false;
         content = new Text(line);
-        while(line.toString().indexOf("</page>")==-1){
-            content.append(line.getBytes(),0,line.getLength());
-            if(line.toString().startsWith("<title>")){
-                abstractTitle();
-            }
-            in.readLine(line);
-        }
-        content.append(line.getBytes(),0,line.getLength());
+//        while(line.toString().indexOf("</page>")==-1){  //bug here
+//            System.err.println("start");
+//            content.append(line.getBytes(),0,line.getLength());
+//            if(line.toString().startsWith("<title>")){
+//                abstractTitle();
+//            }
+//            in.readLine(line);
+//        }
+//        content.append(line.getBytes(),0,line.getLength());
         abstractLinks();
+        //System.err.println("end");
         return true;
     }
 
